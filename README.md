@@ -7,7 +7,7 @@ How to use:
    > stack ghci --ghci-options -XQuasiQuotes src/Examples.hs
 
 You can now get the mutual recursion out of signatures with
-   > ghci> runExample <<example>>
+   > ghci> runExample example
 
 Some examples to try are "fgh","treeforest","onlyList", "multi", and "(generate (veryDense 3))". See also the function "generate" in Examples.hs.
 You can parse declarations of algebraic types using the quasiquoter, as in
