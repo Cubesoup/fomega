@@ -16,15 +16,18 @@ import qualified Data.Set as S
 -- conflicts.
 
 bnfc [lbnf|
+
 TOne.  TyExp ::= "1" ;
 TZero. TyExp ::= "0" ;
 TProd. TyExp ::= TyExp "*" TyExp ; 
 TSum.  TyExp ::= TyExp "+" TyExp ;
 TVar.  TyExp ::= Ident ;
-TAll.  TyExp ::= "all" Ident "::" KindExp "." TyExp ;
-TAbs.  TyExp ::= "lam" Ident "::" KindExp "." TyExp ;
+TAll.  TyExp ::= "all" Ident "." TyExp ;
+TAbs.  TyExp ::= "lam" Ident "." TyExp ;
 TApp.  TyExp ::= TyExp TyExp ;
+TFun.  TyExp ::= TyExp " -> " TyExp ;
 _.     TyExp ::= "(" TyExp ")" ;
+
 
 KStar. KindExp ::= "*" ;
 KArr.  KindExp ::= KindExp "->" KindExp ;
@@ -44,10 +47,12 @@ data AlgType where
   Prod :: AlgType -> AlgType -> AlgType
   Sum  :: AlgType -> AlgType -> AlgType
   Var  :: VarName -> AlgType
-  All  :: VarName -> KindExp -> AlgType -> AlgType
-  Abs  :: VarName -> KindExp -> AlgType -> AlgType
+  All  :: VarName -> AlgType -> AlgType
+  Abs  :: VarName  -> AlgType -> AlgType
   App  :: AlgType -> AlgType -> AlgType
+  Fun  :: AlgType -> AlgType -> AlgType
   Mu   :: VarName -> AlgType -> AlgType -- not in grammar, but accessible through x = t(x) in declarations.
+  -- Should Mu require kind annotation? If so, what are the kinds?
   
 instance Show AlgType where
   show One  = "1"
@@ -56,9 +61,10 @@ instance Show AlgType where
   show (Prod t1 t2) = (show t1) ++ " * " ++ (show t2)
   show (Sum  t1 t2) = (show t1) ++ " + " ++ (show t2)
   show (App t1 t2) = (show t1) ++ " " ++ (show t2)
-  show (All x k t) = "(all " ++ x ++ "::" ++ (prettyKindExp k) ++ " . " ++ (show t) ++ ")"
-  show (Abs x k t) = "(lam " ++ x ++ "::" ++ (prettyKindExp k) ++ " . " ++ (show t) ++ ")"
+  show (All x t) = "(all " ++ x ++ " . " ++ (show t) ++ ")"
+  show (Abs x t) = "(lam " ++ x ++ " . " ++ (show t) ++ ")"
   show (Mu x t) = "(mu " ++ x ++ "." ++ (show t) ++ ")"
+  show (Fun t1 t2) = (show t1) ++ " -> " ++ (show t2)
 
 prettyKindExp :: KindExp -> String
 prettyKindExp KStar = "*"
@@ -70,9 +76,10 @@ algType TZero = Zero
 algType (TProd t1 t2) = Prod (algType t1) (algType t2)
 algType (TSum  t1 t2) = Sum  (algType t1) (algType t2)
 algType (TVar (Ident x)) = Var x
-algType (TAll (Ident x) k t) = All x k (algType t)
-algType (TAbs (Ident x) k t) = Abs x k (algType t)
+algType (TAll (Ident x) t) = All x (algType t)
+algType (TAbs (Ident x) t) = Abs x (algType t)
 algType (TApp t1 t2) = App (algType t1) (algType t2)
+algType (TFun t1 t2) = Fun (algType t1) (algType t2)
 
 algDecl :: DeclExp -> Decl AlgType
 algDecl (TyDecl (Ident name) t) = Decl name (algType t)
@@ -104,10 +111,11 @@ free Zero = S.empty
 free (Prod t1 t2) = S.union (free t1) (free t2)
 free (Sum  t1 t2) = S.union (free t1) (free t2)
 free (Var x) = S.singleton x
-free (All x k t) = S.delete x (free t)
-free (Abs x k t) = S.delete x (free t)
+free (All x t) = S.delete x (free t)
+free (Abs x t) = S.delete x (free t)
 free (App t1 t2) = S.union (free t1) (free t2)
 free (Mu x t) = S.delete x (free t)
+free (Fun t1 t2) = S.union (free t1) (free t2)
 
 -- sub x t a is a[t/x], the result of substituting t for free occurrences of x in a.
 -- I suspect the way this is implemented is a bit dumb. I don't think it impacts performance. 
@@ -124,6 +132,7 @@ sub t x a = subExcept [] t x a
            (Prod t1 t2) -> Prod (subExcept bound t x t1) (subExcept bound t x t2)
            (Sum  t1 t2) -> Sum  (subExcept bound t x t1) (subExcept bound t x t2)
            (App  t1 t2) -> App  (subExcept bound t x t1) (subExcept bound t x t2)
-           (Abs y k t') -> Abs y k (subExcept (y:bound) t x t')
-           (All y k t') -> All y k (subExcept (y:bound) t x t')
-           (Mu y t')     -> Mu y (subExcept (y:bound) t x t')
+           (Abs y t') -> Abs y (subExcept (y:bound) t x t')
+           (All y t') -> All y (subExcept (y:bound) t x t')
+           (Mu y t')    -> Mu y (subExcept (y:bound) t x t')
+           (Fun t1 t2)  -> Fun (subExcept bound t x t1) (subExcept bound t x t2)
