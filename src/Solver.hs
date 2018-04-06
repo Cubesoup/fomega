@@ -113,11 +113,3 @@ fixArg n x (t,bigT) = ( t
 demutualize :: AlgSignature -> AlgSignature
 demutualize sig = algSignature (concatMap (solve . fpEquations) (partitionMRec sig))
 
-runExample :: AlgSignature -> IO ()
-runExample sig = (putStrLn "before:")  >>
-                 (prettySignature sig) >>
-                 (putStrLn "----------") >>
-                 (putStrLn "after:")   >>
-                 (prettySignature (demutualize sig))
-
-

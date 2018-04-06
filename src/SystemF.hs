@@ -15,18 +15,20 @@ type VarName = String
 data Type where
   TyVar :: VarName -> Type
   TyFun :: Type -> Type -> Type
-  TyAll :: VarName -> Kind -> Type -> Type
-  TyAbs :: VarName -> Kind -> Type -> Type
+  TyAll :: VarName -> Type -> Type
+  TyAbs :: VarName -> Type -> Type
   TyApp :: Type -> Type -> Type
   TyFix :: Type -> Type
+  TyMu  :: VarName -> Type -> Type
 
 instance Show Type where
   show (TyVar x)     = x
   show (TyFun t1 t2) = "(" ++ (show t1) ++ " -> " ++ (show t2) ++ ")"
-  show (TyAll x k t) = "(" ++ "all " ++ x ++ "::" ++ (show k) ++ "." ++ (show t) ++ ")"
-  show (TyAbs x k t) = "(" ++ "lam " ++ x ++ "::" ++ (show k) ++ "." ++ (show t) ++ ")"
+  show (TyAll x t) = "(" ++ "all " ++ x ++ "." ++ (show t) ++ ")"
+  show (TyAbs x t) = "(" ++ "lam " ++ x ++ "." ++ (show t) ++ ")"
   show (TyApp t1 t2) = "(" ++ (show t1) ++ " " ++ (show t2) ++ ")"
   show (TyFix t)     = "(" ++ "fix " ++ (show t) ++ ")"
+  show (TyMu  x t)     = "(" ++ "mu "  ++ x ++ "." ++ (show t) ++ ")"
 
 data Kind where
   Star  :: Kind
@@ -59,7 +61,7 @@ getBinding (b:bs) x = case b of
 --------------------
 -- Kind Inference --
 --------------------
-
+{-
 kind :: Context -> Type -> Kind
 kind ctx (TyVar x) = case getBinding ctx x of
                        (Left  t) -> error ("The type variable " ++ x ++ " is assigned type " ++ (show t) ++
@@ -96,8 +98,8 @@ kind ctx (TyFix t) = let k = kind ctx t in
                          (Arrow k1 k2) -> if k1 == k2 then k1 else (error "can only fix types of kind k -> k")
                          Star          -> error "cannot fix types of kind *"
                                                            
-                       
 
+-}
 ------------------------
 -- Type Normalization --
 ------------------------
@@ -105,11 +107,11 @@ kind ctx (TyFix t) = let k = kind ctx t in
 reduce :: Type -> Type
 reduce (TyVar x) = TyVar x
 reduce (TyFun t1 t2) = TyFun (reduce t1) (reduce t2)
-reduce (TyAll x k t) = TyAll x k t
-reduce (TyAbs x k t) = TyAbs x k t
+reduce (TyAll x t) = TyAll x t
+reduce (TyAbs x t) = TyAbs x t
 reduce (TyFix t) = TyFix (reduce t)
 reduce (TyApp t1 t2) = case t1 of
-                        (TyAbs x k t) -> sub t2 x t
+                        (TyAbs x t) -> sub t2 x t
                         _             -> (TyApp (reduce t1) t2)
 
 -- sub a x t is t[a/x].
@@ -121,8 +123,9 @@ sub = subExcept []
                              case t' of
                                (TyVar y) -> if x == y then t else (TyVar y) 
                                (TyFun t1 t2)   -> TyFun (subExcept bound t x t1) (subExcept bound t x t2)
-                               (TyAll x' k t') -> TyAll x' k (subExcept (x:bound) t x t')
-                               (TyAbs x' k t') -> TyAbs x' k (subExcept (x:bound) t x t')
+                               (TyAll x' t') -> TyAll x' (subExcept (x:bound) t x t')
+                               (TyAbs x' t') -> TyAbs x' (subExcept (x:bound) t x t')
                                (TyFix t')      -> TyFix (subExcept (bound) t x t')
                                (TyApp t1 t2)   -> TyApp (subExcept bound t x t1) (subExcept bound t x t2)
-  
+
+
