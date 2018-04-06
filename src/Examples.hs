@@ -13,28 +13,28 @@ import AlgTypes
 -- of brackets. Luckily, the demutualizer only requires substitution, so it works anyway. 
 
 list :: Decl AlgType
-list = algDecl [declExp| list = all x :: * . 1 + (list x) * x |]  
+list = algDecl [declExp| list = all x . 1 + (list x) * x |]  
 
 binarytree :: Decl AlgType
-binarytree = algDecl [declExp| binarytree = all a :: * . 1 + (binaryTree a) * a * (binaryTree a)|]
+binarytree = algDecl [declExp| binarytree = all a . 1 + (binaryTree a) * a * (binaryTree a)|]
 
 rosetree :: Decl AlgType
-rosetree = algDecl [declExp| rosetree = all a :: * . 1 * (list (rosetree a)) |]
+rosetree = algDecl [declExp| rosetree = all a . 1 * (list (rosetree a)) |]
 
 tree :: Decl AlgType
-tree = algDecl [declExp| tree = all a :: *. 1 + (a * (forest a)) |]
+tree = algDecl [declExp| tree = all a . 1 + (a * (forest a)) |]
 
 forest :: Decl AlgType
-forest = algDecl [declExp| forest = all a :: *. 1 + ((tree a) * (forest a)) |]
+forest = algDecl [declExp| forest = all a . 1 + ((tree a) * (forest a)) |]
 
 typeF :: Decl AlgType
-typeF = algDecl [declExp| f = (all a::*. 1 + ((f a) * (h a)))|]
+typeF = algDecl [declExp| f = (all a . 1 + ((f a) * (h a)))|]
 
 typeG :: Decl AlgType
-typeG = algDecl [declExp| g = (all a::*. ((h a) * (g a)) + 1)|]
+typeG = algDecl [declExp| g = (all a . ((h a) * (g a)) + 1)|]
 
 typeH :: Decl AlgType
-typeH = algDecl [declExp| h = (all a::*. (f a) * (g a))|]
+typeH = algDecl [declExp| h = (all a . (f a) * (g a))|]
 
 treeForest :: AlgSignature
 treeForest = algSignature [tree,forest]
