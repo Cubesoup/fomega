@@ -4,7 +4,7 @@ How to use:
 2. In the directory where the repository lives, run
    > stack build --only-dependencies
 3. Now, run
-   > stack ghci --ghci-options -XQuasiQuotes src/Scott.hs
+   > stack ghci --ghci-options -XQuasiQuotes src/Examples.hs
 
 You can now get the mutual recursion and algebraic types out of signatures with
    > ghci> runExample example
