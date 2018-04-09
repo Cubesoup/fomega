@@ -5,15 +5,21 @@ Individual tests have been plotted as points, with the X coordinate being the si
 A system of N mutually recursive types t1,t2,...,tN can be thought of as a system of fixed point equations
 
 t1 = T1(t1,t2,...,tN)
+
 t2 = T2(t1,t2,...,tN)
+
 ...
+
 tN = TN(t1,t2,...,tN)
 
 and from such a system of fixed point equations we can construct an NxN matrix
 
 t1,1 t1,2 ... t1,N
+
 t2,1 t2,2 ... t2,N
+
 ...
+
 tN,1 tN,2 ... tN,N
 
 where ti,j is 1 in case tj occurs in T1(t1,t2,...,tN), and is 0 otherwise. Conversely, from such a matrix, we can construct a system of N types that would yield the matrix. For example, if the matrix is
