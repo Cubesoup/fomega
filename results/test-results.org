@@ -1,0 +1,5 @@
+* Term Size Increases When Removing Mutual Recursion
+
+test image for github:
+
+[[file:density-30.png][density 30]]
