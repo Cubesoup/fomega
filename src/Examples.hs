@@ -8,6 +8,9 @@ import Scott
   
 import System.Random
 import Test.QuickCheck
+import System.IO
+import Control.Applicative
+import Control.Monad
 
 -- (use the runExample :: AlgSignature -> IO () from AlgTypes)
 
@@ -60,7 +63,32 @@ instance Show TestResult where
 --   also plot a line running through the average size across all tests for each number of types.
 -- + make images. Be sure to label. Stare at images to draw conclusions.
 
+-- 'testRandom rng t d path' generates t random systems of i types with density d, for each i in rng.
+--  It then writes the resulting pairs of (initial size, size after mutual recursion removed) to a
+--  file "path" in the current directory.
+testRandom :: [Int] -> Int -> Probability -> FilePath -> IO ()
+testRandom rng t d path = join (writeResults path <$> mapM (\i -> randomTest d i t) rng)
 
+-- 'testFixed f rng path' computes the (before, after) data for (f i), each i in rng.
+testFixed :: (Int -> Density) -> [Int] -> FilePath -> IO ()
+testFixed dgen rng path = writeDat path (map (\i -> beforeAfter (instantiate (dgen i))) rng)
+
+writeResults :: FilePath -> [TestResult] -> IO ()
+writeResults path rs = writeDat path (concatResults rs)
+
+concatResults :: [TestResult] -> [(Integer,Integer)]
+concatResults = foldr (\(TR _ _ p) ps -> p ++ ps) [] 
+
+-- 'writeDat "name" points' creates / overwrites a file "name" containing the list of points
+-- stored in gnuplot's .dat format. 
+writeDat :: FilePath -> [(Integer,Integer)] -> IO ()
+writeDat path points = do
+  file <- openFile path WriteMode
+  mapM_ (writePoint file) points
+  hClose file
+
+writePoint :: Handle -> (Integer,Integer) -> IO ()
+writePoint file (x,y) = hPutStrLn file ((show x) ++ " " ++ (show y))
 --------------
 -- Examples --
 --------------
