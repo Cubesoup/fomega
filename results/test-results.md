@@ -19,15 +19,21 @@ tN,1 tN,2 ... tN,N
 where ti,j is 1 in case tj occurs in T1(t1,t2,...,tN), and is 0 otherwise. Conversely, from such a matrix, we can construct a system of N types that would yield the matrix. For example, if the matrix is
 
 1 1 0 1
+
 0 1 0 0
+
 0 1 1 0
+
 1 0 1 1
 
 then the system 
 
 t1 = t1 + t2 + 1  + t4
+
 t2 = 1  + t2 + 1  + 1
+
 t3 = 1  + t2 + t3 + 1
+
 t4 = t1 + 1  + t3 + t4
 
 yields that matrix. The main thing determining how large the representation of a system of types becomes when mutual recursion is removed seems to be this matrix. 
