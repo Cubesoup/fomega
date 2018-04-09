@@ -4,9 +4,6 @@ import AlgTypes
 import SystemF
 import qualified Data.Set as S
 
-import Solver -- don't need
-import Examples -- don't need
-
 -- note that "#R" is not a valid bnfc Ident(ifier), and as such it won't 
 -- be the name of any variable output by the parser.
 returnName :: String
@@ -69,16 +66,4 @@ instance Size a => Size (Decl a) where
 instance Size a => Size (S.Set a) where
   size = S.foldr (\a b -> (size a) + b) 0 
 
-translate :: AlgSignature -> FSignature
-translate = scottSig . demutualize
 
-runExample :: AlgSignature -> IO ()
-runExample sig = (putStrLn ("before: size = " ++ (show (size sig))))  >>
-                 (prettySignature sig) >>
-                 (putStrLn "----------") >>
-                 (putStrLn ("after: size = " ++ (show (size (translate sig))))) >>
-                 (prettySignature (translate sig))
-
-onlySizes :: AlgSignature -> IO ()                 
-onlySizes sig = (putStrLn ("before: size = " ++ (show (size sig)))) >>
-                (putStrLn ("after:  size = " ++ (show (size (translate sig)))))

@@ -24,6 +24,8 @@ dependencies:
 - containers
 - mtl
 - BNFC-meta
+- QuickCheck
+- random
 
 library:
   source-dirs: src

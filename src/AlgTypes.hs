@@ -136,3 +136,32 @@ sub t x a = subExcept [] t x a
            (All y t') -> All y (subExcept (y:bound) t x t')
            (Mu y t')    -> Mu y (subExcept (y:bound) t x t')
            (Fun t1 t2)  -> Fun (subExcept bound t x t1) (subExcept bound t x t2)
+
+-- rewrite x+0 => x, x+1 => x.
+simplify :: AlgType -> AlgType
+simplify One = One
+simplify Zero = Zero
+simplify (Prod t1 t2) = let s1 = simplify t1
+                            s2 = simplify t2 in
+                          case s1 of
+                            One -> s2
+                            _   -> case s2 of
+                                     One -> s1
+                                     _   -> Prod s1 s2
+simplify (Sum t1 t2) = let s1 = simplify t1
+                           s2 = simplify t2 in
+                         case s1 of
+                           Zero -> s2
+                           _    -> case s2 of
+                                     Zero -> s1
+                                     _    -> Sum s1 s2
+simplify (Var x) = Var x
+simplify (All x t) = All x (simplify t)
+simplify (Abs x t) = Abs x (simplify t)
+simplify (App t1 t2) = App (simplify t1) (simplify t2)
+simplify (Fun t1 t2) = Fun (simplify t1) (simplify t2)
+simplify (Mu x t) = Mu x (simplify t)
+
+simplifySignature :: AlgSignature -> AlgSignature
+simplifySignature = S.map (\(Decl name t) -> Decl name (simplify t))
+
