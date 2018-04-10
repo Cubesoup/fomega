@@ -1,6 +1,5 @@
 * Term Expansion When Removing Mutual Recursion
 
-Individual tests have been plotted as points, with the X coordinate being the size (in number of constructors required to represent) of the system of mutually recursive equations under consideration, and the Y coordinate being the size of the system once mutuall recursion has been removed. 
 
 A system of N mutually recursive types t1,t2,...,tN can be thought of as a system of fixed point equations
 
@@ -44,11 +43,27 @@ t4 = t1 + 1  + t3 + t4
 
 yields that matrix. The main thing determining how large the representation of a system of types becomes when mutual recursion is removed seems to be this matrix. 
 
-The worst case considered is the case in which the matrix consists entirely of 1. Plotting the result of removing mutual recursion from the system corresponding to this matrix of size 1..10 yields: (X-axis is initial size, Y-axis is size after mutualy recursion removed)
+** Deterministic Tests
+
+Individual tests have been plotted as points, with the X coordinate being the size (in number of constructors required to represent) of the system of mutually recursive equations under consideration, and the Y coordinate being the size of the system once mutuall recursion has been removed. 
+
+The worst case considered is the case in which the matrix consists entirely of 1. Plotting the result of removing mutual recursion from the system corresponding to this matrix of size 1..10 yields: 
 
 ![worst-case](/results/worst-case.png)
 
-** Deterministic Tests
+The shape of the graph tells us two things. First, the worst case for a system of 10 types is gigantic (about size 1.9*10^8, with initial size ~180). Second, the function this graph plots is growing absurdly fast (the little dip is caused by the line being a spline. The function never decreases).
+
+The worst case probably never occurs in practice. I've certainly never seen a system of 10 mutually recursive types in which each type directly references each other type in the wild. It also makes sense to consider the system in which ti refers directly to ti+1, and tN refers to t1, creating a cycle. This is one of the sparser systems in which every type refers to every other type. Plotting this system for (N in [1..20]) types yields:
+
+![small-nontrivial](/results/small-nontrivial.png)
+
+It looks like a polynomial function. This isn't terrible.
+
+As a sort of control, I've also plotted the system where each type refers only to itself (no mutual recursion) for (N in [1..20]) types:
+
+![trivial](/results/trivial.png)
+
+It seems to be growing linearly, as expected. (It isn't quite Y=X, but it's very, very close). 
 
 ** Random Tests
 
