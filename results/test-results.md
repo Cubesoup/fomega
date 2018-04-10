@@ -262,4 +262,4 @@ after:  size = 143
 
 ## Conclusion
 
-I think that if we can stomach the size increase of the Java grammar, them we can go ahead without product kinds. If not, we should probably add product kinds. While many of the randomly generated examples are worrying, I suspect that the Java grammar is near the upper end of complexity for systems of mutually recursive types.
+I think that if we can stomach the size increase of the Java grammar, them we can go ahead without product kinds. If not, we should probably add product kinds. While many of the randomly generated examples are worrying, I suspect that the Java grammar is near the upper end of complexity for systems of mutually recursive types that people actually write.
