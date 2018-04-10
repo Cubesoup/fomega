@@ -5,6 +5,7 @@ module Examples where
 import Solver
 import AlgTypes
 import Scott
+import Large
   
 import System.Random
 import Test.QuickCheck
