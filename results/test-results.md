@@ -1,5 +1,4 @@
-* Term Expansion When Removing Mutual Recursion
-
+# Term Expansion When Removing Mutual Recursion
 
 A system of N mutually recursive types t1,t2,...,tN can be thought of as a system of fixed point equations
 
@@ -43,7 +42,7 @@ t4 = t1 + 1  + t3 + t4
 
 yields that matrix. The main thing determining how large the representation of a system of types becomes when mutual recursion is removed seems to be this matrix. 
 
-** Deterministic Tests
+## Deterministic Tests
 
 Individual tests have been plotted as points, with the X coordinate being the size (in number of constructors required to represent) of the system of mutually recursive equations under consideration, and the Y coordinate being the size of the system once mutuall recursion has been removed. 
 
@@ -65,26 +64,44 @@ As a sort of control, I've also plotted the system where each type refers only t
 
 It seems to be growing linearly, as expected. (It isn't quite Y=X, but it's very, very close). 
 
-** Random Tests
+## Random Tests
 
 Given p a value between 0 and 1, we can easily generate an NxN matrix in which each entry is 1 with probability p, and is 0 with probability (p-1). (p is now something like the "density" of the generated matrix). For p in [10,20,30,..,90], I've used such matrices to generate 100 systems of N types for N in [1..9], and plotted the result as before. 
 
 While the curve looks more or less the same across all densities tested (becoming slightly steeper at higher density), and the X-scale remains the same, the Y-scale grows very quickly. That a randomly generated system (density 50) with initial size ~150 has size ~500000 is worrying. 
 
+Density 10:
+
 ![100 random systems of size 1..9 with density 10](/results/density-10.png)
+
+Density 20:
 
 ![100 random systems of size 1..9 with density 20](/results/density-20.png)
 
+Density 30:
+
 ![100 random systems of size 1..9 with density 30](/results/density-30.png)
+
+Density 40:
 
 ![100 random systems of size 1..9 with density 40](/results/density-40.png)
 
+Density 50:
+
 ![100 random systems of size 1..9 with density 50](/results/density-50.png)
+
+Density 60:
 
 ![100 random systems of size 1..9 with density 60](/results/density-60.png)
 
+Density 70:
+
 ![100 random systems of size 1..9 with density 70](/results/density-70.png)
 
+Density 80:
+
 ![100 random systems of size 1..9 with density 80](/results/density-80.png)
+
+Density 90:
 
 ![100 random systems of size 1..9 with density 90](/results/density-90.png)
