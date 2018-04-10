@@ -44,7 +44,7 @@ yields that matrix. The main thing determining how large the representation of a
 
 ## Deterministic Tests
 
-Individual tests have been plotted as points, with the X coordinate being the size (in number of constructors required to represent) of the system of mutually recursive equations under consideration, and the Y coordinate being the size of the system once mutuall recursion has been removed. 
+Individual tests have been plotted as points, with the X coordinate being the size (in number of constructors required to represent) of the system of mutually recursive equations under consideration, and the Y coordinate being the size of the system once mutual recursion has been removed. 
 
 The worst case considered is the case in which the matrix consists entirely of 1. Plotting the result of removing mutual recursion from the system corresponding to this matrix of size 1..10 yields: 
 
@@ -105,3 +105,7 @@ Density 80:
 Density 90:
 
 ![100 random systems of size 1..9 with density 90](/results/density-90.png)
+
+## Conclusion
+
+We probably want product kinds in our language if it resembles F-omega with equirecursive recursive types.
