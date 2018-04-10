@@ -106,6 +106,97 @@ Density 90:
 
 ![100 random systems of size 1..9 with density 90](/results/density-90.png)
 
+## Large Systems Found in the Wild
+
+The best source of large systems of mutually recursive types seems to be parsers. The [BNFC website](https://bnfc.digitalgrammars.com) links to four large examples, and I've transcribed (uncarefully) three of them to use as test cases. (The omitted grammar is for the C language. It's 350 lines long, and I'm hoping the Java grammar will be similar enough to justify not spending the time transcribing the C grammar).
+
+The (transcribed) [Java grammar](http://people.cs.uchicago.edu/~mrainey/java.cf) is:
+```
+ghci> prettySignature javaSig
+args = list exp
+arrAcc = list 1 * exp + specExp * exp
+arrayInits = variableInits + arrayInits * variableinits + arrayInits
+body = list lVarStatement
+bracketsOpt = 1
+catch = typeSpec * 1 * body + typeSpec * body
+classHeader = list modifier * 1 + list modifier * 1 * list typeName + list modifier * 1 + list modifier * 1 * list typeName + list modifier * 1 + list modifier * 1 * list typeName + list modifier * 1 * list typeName + list modifier * 1 * list typeName * list typeName
+declaratorName = 1 + list bracketsOpt
+dimExpr = exp
+elseIf = exp * stm
+exp = exp * 1 * exp + exp * typeName + exp * exp * exp + exp * exp + exp * exp + exp * exp + exp * exp + exp * exp + exp * exp + exp * exp + exp * exp + exp * exp + exp * exp + basicType * exp + exp * exp + list 1 * list bracketsOpt * exp + 1 * exp + exp + exp + exp + exp + 1 + arrAcc + mthCall + fieldAcc + 1 + 1 + newAllow + list 1
+fieldAcc = specExp * 1 + newAlloc * 1 + list 1 + list 1 + basicType
+fieldDeclaration = list modifier * typeSpec * list varDecl + list modifier * typeSpec * methodDecl * methodBody + list modifier * typeSpec * methodDecl * list typeName * methodBody + list modifier * 1 * list parameter * body + list modifier * 1 * list parameter * list typeName * body + body + typeDecl + body
+forInit = list exp + typeSpec * list varDecl + typeSpec * list varDecl
+guardStm = exp * body + body * list catch + body * list catch * body
+import = list ident * list 1 + list ident * list 1
+iterStm = exp * stm + stm * exp + forInit * list exp * list exp * stm + list exp + typeSpec * list varDecl + typeSpec * list varDecl
+jumpStm = 1 + 1 * 1 + 1 + 1 * 1 + 1 + 1 * exp + 1 * exp
+lVarStatement = typeSpec * list varDecl + typeSpec * list varDecl + stm + 1
+methodBody = 1 + body
+methodDecl = declaratorName * list parameter + methodDecl * bracketsOpt
+modifier = 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1
+mthCall = list 1 * args + specExpNp * args + 1 * args
+newAlloc = typeName * args + typeName * args * list fieldDeclaration + typeName * list dimExpr + typeName * list dimExpr + typeName * list dimExpr * arrayInits
+parameter = typeSpec * declaratorName + typeSpec * declaratorName
+programFile = list 1 * list 1 * list import * list typeDecl + list import * list typeDecl
+selectionStm = exp * stm * list elseIf + exp * stm * list elseIf * stm + exp * body
+specExp = exp + specExpNp + 1
+specExpNp = 1 + arrAcc + mthCall + fieldAcc
+stm = 1 + 1 + exp + 1 + exp + list lVarStatement + jumpStm + guardStm + iterStm + selectionStm
+typeDecl = classHeader * list fileDeclaration
+typeName = 1 + list 1
+typeSpec = typeName * list bracketsOps + typeName
+varDecl = declaratorName * variableInits + 1
+variableInits = exp + 1 + arrayInits
+```
+
+and the size after mutual recursion has been removed is 45127:
+```
+ghci> onlySizes javaSig
+before: size = 603
+after:  size = 45127
+```
+which is much larger than the initial size of 603. This is the worst practical example I've found. It's also one of the larger examples that exists, I think, so if we can live with this one then we're probably okay overall.
+
+I've also transcribed an [Alfa grammar](https://github.com/BNFC/bnfc/tree/master/examples/Alfa):
+
+```
+ghci> prettySignature alfaSig
+arrow = 1 + 1
+binding = 1 * exp
+bound = 1 + 1
+branch = 1 * list 1 * exp + 1 * 1 * 1 * exp + 1 * exp
+constructor = 1 * list typing + 1
+decl = list defAttr * def + import
+def = 1 * list varDecl * exp * exp + 1 * exp + 1 * list typing * packageBody + exp * list openArg + 1 * list typing * list constructor + 1 * list typing * exp + 1 * list typing * exp + list def + comment
+defAttr = 1 + 1 + 1 + 1
+exp = 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + exp * 1 + exp * exp + exp * 1 * exp + list fieldDecl + list binding + list constructor + varDecl * arrow * exp + exp * arrow * exp + varDecl * arrow * exp + list 1 * arrow * exp + list decl * exp + exp * list openArg * exp + exp * list branch + list varDecl * list indConstructor + comment * exp + exp * comment + 1 + integer
+fieldDecl = 1 * exp
+import = 1
+indConstructor = 1 * list typing * list exp
+list = (all a . 1 + a * list a)
+module = list decl
+openArg = list defAttr * 1 + list defAttr * 1 * exp + list defAttr * 1 * exp + list defAttr * 1 * exp * exp
+packageBody = list decl * exp
+typing = varDecl + exp
+varDecl = list bound * exp
+```
+
+for which the size after mutual recursion has been removed is 3692:
+```
+ghci> onlySizes alfaSig
+before: size = 289
+after:  size = 3692
+```
+which is barely 10 times larger than the initial size of 289.
+
+The final large example I transcribed was the grammar for [BNFC itself](https://github.com/BNFC/bnfc/blob/master/examples/LBNF/LBNF.cf), but this turned out not to be terribly mutually recursive:
+```
+ghci> onlySizes bnfcSig
+before: size = 132
+after:  size = 143
+```
+
 ## Conclusion
 
-We probably want product kinds in our language if it resembles F-omega with equirecursive recursive types.
+We probably want product kinds in our language if it resembles F-omega with equirecursive recursive types. 
