@@ -44,6 +44,10 @@ t4 = t1 + 1  + t3 + t4
 
 yields that matrix. The main thing determining how large the representation of a system of types becomes when mutual recursion is removed seems to be this matrix. 
 
+The worst case considered is the case in which the matrix consists entirely of 1. Plotting the result of removing mutual recursion from the system corresponding to this matrix of size 1..10 yields: (X-axis is initial size, Y-axis is size after mutualy recursion removed)
+
+![worst-case](/results/worst-case.png)
+
 ** Deterministic Tests
 
 ** Random Tests
