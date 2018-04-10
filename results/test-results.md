@@ -67,6 +67,8 @@ It seems to be growing linearly, as expected. (It isn't quite Y=X, but it's very
 
 ** Random Tests
 
+Given p a value between 0 and 1, we can easily generate an NxN matrix in which each entry is 1 with probability p, and is 0 with probability (p-1). (p is now something like the "density" of the generated matrix). For p in [10,20,30,..,90], I've used such matrices to generate 100 systems of N types for N in [1..9], and plotted the result as before. 
+
 While the curve looks more or less the same across all densities tested (becoming slightly steeper at higher density), and the X-scale remains the same, the Y-scale grows very quickly. That a randomly generated system (density 50) with initial size ~150 has size ~500000 is worrying. 
 
 ![100 random systems of size 1..9 with density 10](/results/density-10.png)
