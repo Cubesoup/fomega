@@ -1,5 +1,55 @@
 # Term Expansion When Removing Mutual Recursion
 
+## Simple Example
+```
+ghci> runExample fgh
+before: size = 28
+f = (all a . 1 + f a * h a)
+g = (all a . h a * g a + 1)
+h = (all a . f a * g a)
+----------
+after: size = 183
+f = (mu f.(all a . 1 + f a * (mu h.(all a . f a * (mu g.(all a . h a * g a + 1)) a)) a))
+g = (mu g.(all a . (mu h.(all a . (mu f.(all a . 1 + f a * h a)) a * g a)) a * g a + 1))
+h = (mu h.(all a . (mu f.(all a . 1 + f a * h a)) a * (mu g.(all a . h a * g a + 1)) a))
+```
+
+We can also compute the degree to which a system is properly mutually recursive by partitioning it into it's properly mutually recursive subsystems. For example, in `fgh`, the whole thing is properly mutually recursive:
+```
+ghci> map length (partitionMRec fgh)
+[3]
+```
+Whereas, if we consider a larger system of (mostly unrelated) types:
+```
+ghci> runExample multi
+before: size = 72
+binarytree = (all a . 1 + binaryTree a * a * binaryTree a)
+f = (all a . 1 + f a * h a)
+forest = (all a . 1 + tree a * forest a)
+g = (all a . h a * g a + 1)
+h = (all a . f a * g a)
+list = (all x . 1 + list x * x)
+rosetree = (all a . 1 * list rosetree a)
+tree = (all a . 1 + a * forest a)
+----------
+after: size = 268
+binarytree = (mu binarytree.(all a . 1 + binaryTree a * a * binaryTree a))
+f = (mu f.(all a . 1 + f a * (mu h.(all a . f a * (mu g.(all a . h a * g a + 1)) a)) a))
+forest = (mu forest.(all a . 1 + (mu tree.(all a . 1 + a * forest a)) a * forest a))
+g = (mu g.(all a . (mu h.(all a . (mu f.(all a . 1 + f a * h a)) a * g a)) a * g a + 1))
+h = (mu h.(all a . (mu f.(all a . 1 + f a * h a)) a * (mu g.(all a . h a * g a + 1)) a))
+list = (mu list.(all x . 1 + list x * x))
+rosetree = (mu rosetree.(all a . 1 * list rosetree a))
+tree = (mu tree.(all a . 1 + a * (mu forest.(all a . 1 + tree a * forest a)) a))
+```
+it conists of multiple independent systems, each of which is properly mutually recursive (some by virtue of containing only one type):
+```
+ghci> map length (partitionMRec multi)
+[1,3,2,1,1]
+```
+
+## Explanation of Generated Examples
+
 A system of N mutually recursive types t1,t2,...,tN can be thought of as a system of fixed point equations
 
 t1 = T1(t1,t2,...,tN)
@@ -156,7 +206,11 @@ ghci> onlySizes javaSig
 before: size = 603
 after:  size = 45127
 ```
-which is much larger than the initial size of 603. This is the worst practical example I've found. It's also one of the larger examples that exists, I think, so if we can live with this one then we're probably okay overall.
+which is much larger than the initial size of 603. This is the worst practical example I've found. It's also one of the larger examples that exists, I think, so if we can live with this one then we're probably okay overall. Remarkably, this system has a subsystem of 24 properly mutually recursive types:
+```
+ghci> map length (partitionMRec javaSig)
+[24,1,1,1,1,1,1,1,1,1,1,1]
+```
 
 I've also transcribed an [Alfa grammar](https://github.com/BNFC/bnfc/tree/master/examples/Alfa):
 
@@ -188,9 +242,18 @@ ghci> onlySizes alfaSig
 before: size = 289
 after:  size = 3692
 ```
-which is barely 10 times larger than the initial size of 289.
+which is barely 10 times larger than the initial size of 289. This system is also highly mutually recursive:
+```
+ghci> map length (partitionMRec alfaSig)
+[1,12,1,1,1,1,1]
+```
 
-The final large example I transcribed was the grammar for [BNFC itself](https://github.com/BNFC/bnfc/blob/master/examples/LBNF/LBNF.cf), but this turned out not to be terribly mutually recursive:
+The final large example I transcribed was the grammar for [BNFC itself](https://github.com/BNFC/bnfc/blob/master/examples/LBNF/LBNF.cf), but this turned out not to be mutually recursive at all:
+```
+ghci> map length (partitiomMRec bnfcSig)
+[1,1,1,1,1,1,1,1,1,1,1]
+```
+and so the size difference was negligible:
 ```
 ghci> onlySizes bnfcSig
 before: size = 132
